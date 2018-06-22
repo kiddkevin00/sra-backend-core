@@ -31,12 +31,12 @@ class AuthController {
 
     return Promise
       .try(() => {
-        const email = req.body.email;
+        const email = req.body.email && req.body.email.trim();
 
         Validator.shouldNotBeEmpty(email, constants.AUTH.ERROR_NAMES.EMAIL_FIELD_IS_EMPTY);
 
         const options = {
-          email: email.trim() && email.trim().toLowerCase(),
+          email: email.toLowerCase(),
         };
         const context = { containerId, requestCount };
 
@@ -114,9 +114,9 @@ class AuthController {
 
     return Promise
       .try(() => {
-        const fullName = req.body.fullName;
-        const email = req.body.email;
-        const password = req.body.password;
+        const fullName = req.body.fullName && req.body.fullName.trim();
+        const email = req.body.email && req.body.email.trim();
+        const password = req.body.password && req.body.password.trim();
 
         Validator.shouldNotBeEmpty(fullName, constants.AUTH.ERROR_NAMES.FULL_NAME_FIELD_IS_EMPTY);
         Validator.shouldNotBeEmpty(email, constants.AUTH.ERROR_NAMES.EMAIL_FIELD_IS_EMPTY);
@@ -165,12 +165,10 @@ class AuthController {
             type: constants.STORE.OPERATIONS.INSERT,
             data: [
               {
-                //type: constants.SYSTEM.USER_TYPES.UNPAID,
                 email: state.email,
                 passwordHash: state.password, // [TODO] Should store hashed password instead.
                 fullName: state.fullName,
                 isSuspended: false,
-                //referralAmount: 0,
                 version: majorVersion,
                 systemData: {
                   dateCreated: new Date(),
@@ -285,8 +283,8 @@ class AuthController {
 
     return Promise
       .try(() => {
-        const email = req.body.email;
-        const password = req.body.password;
+        const email = req.body.email && req.body.email.trim();
+        const password = req.body.password && req.body.password.trim();
 
         Validator.shouldNotBeEmpty(email, constants.AUTH.ERROR_NAMES.EMAIL_FIELD_IS_EMPTY);
         Validator.shouldNotBeEmpty(password, constants.AUTH.ERROR_NAMES.PASSWORD_FIELD_IS_EMPTY);
@@ -317,52 +315,53 @@ class AuthController {
         return AuthController._handleRequest(state, res, DatabaseService, loginStrategy)
       })
       .then((result) => {
-        let response;
-        let statusCode;
+        if (!Array.isArray(result) || (result.length !== 1)) {
+          const err = new StandardErrorWrapper([
+            {
+              code: constants.SYSTEM.ERROR_CODES.UNAUTHENTICATED,
+              name: constants.AUTH.ERROR_NAMES.LOGIN_INFO_INCORRECT,
+              source: constants.SYSTEM.COMMON.CURRENT_SOURCE,
+              message: constants.AUTH.ERROR_MSG.LOGIN_INFO_INCORRECT,
+            },
+          ]);
 
-        if (Array.isArray(result) && (result.length === 1)) {
-          const user = { ...result[0] };
-
-          delete user.passwordHash;
-          delete user.isSuspended;
-          delete user.version;
-          delete user.systemData;
-
-          response = {
-            success: true,
-            detail: user,
-          };
-          statusCode = constants.SYSTEM.HTTP_STATUS_CODES.OK;
-
-          const jwtPayload = Object.assign({}, user, {
-            sub: `${user.email}:${user._id}`,
-          });
-          const jwtToken = jwt.sign(jwtPayload, jwtSecret, {
-            issuer: jwtIssuer,
-            audience: jwtAudience,
-            expiresIn: jwtExpiresIn,
-            notBefore: jwtNotBefore,
-          });
-
-          res.cookie(constants.CREDENTIAL.JWT.COOKIE_NAME, jwtToken, {
-            httpOnly: constants.CREDENTIAL.JWT.COOKIE_HTTP_ONLY,
-            secure: constants.CREDENTIAL.JWT.COOKIE_SECURE,
-            path: constants.CREDENTIAL.JWT.COOKIE_PATH,
-            maxAge: constants.CREDENTIAL.JWT.COOKIE_MAX_AGE,
-            signed: constants.CREDENTIAL.JWT.COOKIE_SIGNED,
-          });
-        } else {
-          response = {
-            success: false,
-            detail: result,
-          };
-          statusCode = constants.SYSTEM.HTTP_STATUS_CODES.INTERNAL_SERVER_ERROR;
+          throw err;
         }
+
+        const user = { ...result[0] };
+
+        delete user.passwordHash;
+        delete user.isSuspended;
+        delete user.version;
+        delete user.systemData;
+
+        const response = {
+          success: true,
+          detail: user,
+        };
+
+        const jwtPayload = Object.assign({}, user, {
+          sub: `${user.email}:${user._id}`,
+        });
+        const jwtToken = jwt.sign(jwtPayload, jwtSecret, {
+          issuer: jwtIssuer,
+          audience: jwtAudience,
+          expiresIn: jwtExpiresIn,
+          notBefore: jwtNotBefore,
+        });
+
+        res.cookie(constants.CREDENTIAL.JWT.COOKIE_NAME, jwtToken, {
+          httpOnly: constants.CREDENTIAL.JWT.COOKIE_HTTP_ONLY,
+          secure: constants.CREDENTIAL.JWT.COOKIE_SECURE,
+          path: constants.CREDENTIAL.JWT.COOKIE_PATH,
+          maxAge: constants.CREDENTIAL.JWT.COOKIE_MAX_AGE,
+          signed: constants.CREDENTIAL.JWT.COOKIE_SIGNED,
+        });
 
         const standardResponse = new StandardResponseWrapper([response],
           constants.SYSTEM.RESPONSE_NAMES.LOGIN);
 
-        return res.status(statusCode)
+        return res.status(constants.SYSTEM.HTTP_STATUS_CODES.OK)
           .json(standardResponse.format);
       })
       .catch((_err) => {
@@ -415,12 +414,12 @@ class AuthController {
 
     return Promise
       .try(() => {
-        const email = req.body.email;
+        const email = req.body.email && req.body.email.trim();
 
         Validator.shouldNotBeEmpty(email, constants.AUTH.ERROR_NAMES.EMAIL_FIELD_IS_EMPTY);
 
         const options = {
-          email: email.trim() && email.toLowerCase(),
+          email: email.toLowerCase(),
         };
         const context = { containerId, requestCount };
 
