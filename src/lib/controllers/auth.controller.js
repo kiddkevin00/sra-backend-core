@@ -395,7 +395,7 @@ class AuthController {
   static logout(req, res) {
     requestCount += 1;
 
-    res.clearCookie(constants.CREDENTIAL.JWT.COOKIE_NAME)//, '', {
+    res.clearCookie(constants.CREDENTIAL.JWT.COOKIE_NAME, {path:'/api'})//, '', {
     //  httpOnly: constants.CREDENTIAL.JWT.COOKIE_HTTP_ONLY,
     //  secure: constants.CREDENTIAL.JWT.COOKIE_SECURE,
     //  path: constants.CREDENTIAL.JWT.COOKIE_PATH,
