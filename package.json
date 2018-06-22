@@ -16,7 +16,6 @@
           "poolSize": 10,
           "connectTimeoutMS": 10000,
           "socketTimeoutMS": 10000
-
         }
       },
       "postgres-store": {
@@ -81,7 +80,6 @@
   "dependencies": {
     "axios": "0.18.0",
     "bluebird": "3.4.6",
-    "blueimp-md5": "2.7.0",
     "body-parser": "1.15.2",
     "compression": "1.6.2",
     "cookie-parser": "1.4.3",
@@ -92,7 +90,6 @@
     "express-session": "1.14.0",
     "jade": "1.11.0",
     "jsonwebtoken": "7.4.3",
-    "mailchimp-api-v3": "1.7.0",
     "method-override": "2.3.6",
     "mongojs": "2.4.0",
     "morgan": "1.7.0",
@@ -102,8 +99,7 @@
     "pgtools": "0.2.2",
     "query-string": "0.2.0",
     "sequelize": "3.25.0",
-    "serve-favicon": "2.3.2",
-    "stripe": "4.15.0"
+    "serve-favicon": "2.3.2"
   },
   "devDependencies": {
     "chai": "^3.5.0",

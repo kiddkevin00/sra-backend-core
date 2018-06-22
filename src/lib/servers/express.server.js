@@ -19,7 +19,7 @@ function setupExpressServer(app) {
     origin: constants.AUTH.CORS.WHITELIST,
     credentials: true,
     maxAge: 86400,
-    methods: ['GET', 'POST', 'PUT', 'DELETE'],
+    methods: ['GET', 'POST', 'PUT', 'DELETE', 'PATCH'],
   }));
 
   app.use(bodyParser.urlencoded({ extended: false }));
@@ -38,7 +38,7 @@ function setupExpressServer(app) {
   app.set('view engine', 'jade');
 
   if (app.get('env') === 'production') {
-    const accessLogStream = fs.createWriteStream(path.resolve(__dirname, '../../../morgan.log'),
+    const accessLogStream = fs.createWriteStream(path.resolve(__dirname, '../../../', 'morgan.log'),
       { flags: 'a' });
 
     app.use(morgan('combined', { stream: accessLogStream }));

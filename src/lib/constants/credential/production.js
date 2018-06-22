@@ -1,7 +1,7 @@
 exports.JWT = {
   SECRET: '80026A186D8328ADF0D929DE1F5C060E5A4A217080E749722883C0366049FEEA',
-  ISSUER: '0.0.0.0:8087 ',
-  AUDIENCE: '0.0.0.0:8088',
+  ISSUER: 'sra-backend-core.herokuapp.com',
+  AUDIENCE: 'society-risk-analysis.herokuapp.com',
   EXPIRES_IN: '31 days',
   NOT_BEFORE: 0,
 

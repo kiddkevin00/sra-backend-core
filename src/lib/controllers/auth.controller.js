@@ -91,11 +91,19 @@ class AuthController {
           message: constants.SYSTEM.ERROR_MSG.CAUGHT_ERROR_IN_AUTH_CONTROLLER,
         });
 
+        const response = new StandardResponseWrapper([
+          {
+            success: false,
+            status: err.getNthError(0).name,
+            detail: err.format({
+              containerId: state && state.context.containerId,
+              requestCount: state && state.context.requestCount,
+            }),
+          },
+        ], constants.SYSTEM.RESPONSE_NAMES.SUBSCRIBE);
+
         return res.status(resStatusCode)
-          .json(err.format({
-            containerId: state && state.context.containerId,
-            requestCount: state && state.context.requestCount,
-          }));
+          .json(response.format);
       });
   }
 
@@ -134,10 +142,10 @@ class AuthController {
           tableName: constants.STORE.TABLE_NAMES.USER,
         };
 
-        return AuthController._handleRequest(state, res, DatabaseService, signupCheckStrategy)
+        return AuthController._handleRequest(state, res, DatabaseService, signupCheckStrategy);
       })
       .then((result) => {
-        if (Array.isArray(result) && result.length >= 1) {
+        if (!Array.isArray(result) || result.length !== 0) {
           const err = new StandardErrorWrapper([
             {
               code: constants.SYSTEM.ERROR_CODES.BAD_REQUEST,
@@ -180,47 +188,48 @@ class AuthController {
       })
       .then((result) => {
         const user = { ...result };
-        const emailSender = new EmailSender('Gmail', '2012tsra@gmail.com');
-        const from = '"Society Risk Analysis Team" <2012tsra@gmail.com>';
-        const to = state.email;
-        const subject = 'Welcome to Society Risk Analysis';
-
-        // [TODO] Update content.
-        const html = fs.readFileSync(path.resolve(__dirname, '../views/welcome-email.html'),
-          'utf8');
-
-        emailSender.sendMail(from, to, subject, html)
-          .then((info) => {
-            // [TODO] Replace with logger module.
-            console.log('Welcome email message ID - %s sent: %s', info.messageId, info.response);
-          })
-          .catch((_err) => {
-            const err = new StandardErrorWrapper(_err);
-
-            err.append({
-              code: constants.SYSTEM.ERROR_CODES.INTERNAL_SERVER_ERROR,
-              name: constants.SYSTEM.ERROR_NAMES.CAUGHT_ERROR_IN_AUTH_CONTROLLER,
-              source: constants.SYSTEM.COMMON.CURRENT_SOURCE,
-              message: constants.SYSTEM.ERROR_MSG.CAUGHT_ERROR_IN_AUTH_CONTROLLER,
-            });
-
-            // [TODO] Replace with logger module.
-            console.log('ERROR...', err);
-          });
+        //const emailSender = new EmailSender('Gmail', '2012tsra@gmail.com');
+        //const from = '"Society Risk Analysis Team" <2012tsra@gmail.com>';
+        //const to = state.email;
+        //const subject = 'Welcome to Society Risk Analysis';
+        //
+        //// [TODO] Update content.
+        //const html = fs.readFileSync(path.resolve(__dirname, '../views/welcome-email.html'),
+        //  'utf8');
+        //
+        //emailSender.sendMail(from, to, subject, html)
+        //  .then((info) => {
+        //    // [TODO] Replace with logger module.
+        //    console.log('Welcome email message ID - %s sent: %s', info.messageId, info.response);
+        //  })
+        //  .catch((_err) => {
+        //    const err = new StandardErrorWrapper(_err);
+        //
+        //    err.append({
+        //      code: constants.SYSTEM.ERROR_CODES.INTERNAL_SERVER_ERROR,
+        //      name: constants.SYSTEM.ERROR_NAMES.CAUGHT_ERROR_IN_AUTH_CONTROLLER,
+        //      source: constants.SYSTEM.COMMON.CURRENT_SOURCE,
+        //      message: constants.SYSTEM.ERROR_MSG.CAUGHT_ERROR_IN_AUTH_CONTROLLER,
+        //    });
+        //
+        //    // [TODO] Replace with logger module.
+        //    console.log('Something went wrong while sending welcome email...', err);
+        //  });
 
         delete user.passwordHash;
         delete user.isSuspended;
         delete user.version;
         delete user.systemData;
 
-        const jwtPayload = Object.assign({}, user, {
-          sub: `${user.type}:${user.email}:${user._id}`,
-        });
+        const jwtPayload = {
+          ...user,
+          sub: `${user.email}:${user._id}`,
+        };
         const jwtToken = jwt.sign(jwtPayload, jwtSecret, {
-          expiresIn: jwtExpiresIn,
-          notBefore: jwtNotBefore,
           issuer: jwtIssuer,
           audience: jwtAudience,
+          expiresIn: jwtExpiresIn,
+          notBefore: jwtNotBefore,
         });
 
         res.cookie(constants.CREDENTIAL.JWT.COOKIE_NAME, jwtToken, {
@@ -228,6 +237,7 @@ class AuthController {
           secure: constants.CREDENTIAL.JWT.COOKIE_SECURE,
           path: constants.CREDENTIAL.JWT.COOKIE_PATH,
           signed: constants.CREDENTIAL.JWT.COOKIE_SIGNED,
+          maxAge: 3600000, // TODO
         });
 
         const response = {
@@ -245,22 +255,6 @@ class AuthController {
         const resStatusCode = err.getNthError(0).code < 1000 ?
           err.getNthError(0).code : constants.SYSTEM.HTTP_STATUS_CODES.INTERNAL_SERVER_ERROR;
 
-        if (err.getNthError(0).name === constants.AUTH.ERROR_NAMES.EMAIL_ALREADY_SIGNUP) {
-          const response = new StandardResponseWrapper([
-            {
-              success: false,
-              status: constants.AUTH.ERROR_NAMES.EMAIL_ALREADY_SIGNUP,
-              detail: err.format({
-                containerId: state && state.context.containerId,
-                requestCount: state && state.context.requestCount,
-              }),
-            },
-          ], constants.SYSTEM.RESPONSE_NAMES.SIGN_UP);
-
-          return res.status(resStatusCode)
-            .json(response.format);
-        }
-
         err.append({
           code: constants.SYSTEM.ERROR_CODES.INTERNAL_SERVER_ERROR,
           name: constants.SYSTEM.ERROR_NAMES.CAUGHT_ERROR_IN_AUTH_CONTROLLER,
@@ -268,11 +262,19 @@ class AuthController {
           message: constants.SYSTEM.ERROR_MSG.CAUGHT_ERROR_IN_AUTH_CONTROLLER,
         });
 
+        const response = new StandardResponseWrapper([
+          {
+            success: false,
+            status: err.getNthError(0).name,
+            detail: err.format({
+              containerId: state && state.context.containerId,
+              requestCount: state && state.context.requestCount,
+            }),
+          },
+        ], constants.SYSTEM.RESPONSE_NAMES.SIGN_UP);
+
         return res.status(resStatusCode)
-          .json(err.format({
-            containerId: state && state.context.containerId,
-            requestCount: state && state.context.requestCount,
-          }));
+          .json(response.format);
       });
   }
 
@@ -333,13 +335,13 @@ class AuthController {
           statusCode = constants.SYSTEM.HTTP_STATUS_CODES.OK;
 
           const jwtPayload = Object.assign({}, user, {
-            sub: `${user.type}:${user.email}:${user._id}`,
+            sub: `${user.email}:${user._id}`,
           });
           const jwtToken = jwt.sign(jwtPayload, jwtSecret, {
-            expiresIn: jwtExpiresIn,
-            notBefore: jwtNotBefore,
             issuer: jwtIssuer,
             audience: jwtAudience,
+            expiresIn: jwtExpiresIn,
+            notBefore: jwtNotBefore,
           });
 
           res.cookie(constants.CREDENTIAL.JWT.COOKIE_NAME, jwtToken, {
@@ -374,23 +376,31 @@ class AuthController {
           message: constants.SYSTEM.ERROR_MSG.CAUGHT_ERROR_IN_AUTH_CONTROLLER,
         });
 
+        const response = new StandardResponseWrapper([
+          {
+            success: false,
+            status: err.getNthError(0).name,
+            detail: err.format({
+              containerId: state && state.context.containerId,
+              requestCount: state && state.context.requestCount,
+            }),
+          },
+        ], constants.SYSTEM.RESPONSE_NAMES.LOGIN);
+
         return res.status(resStatusCode)
-          .json(err.format({
-            containerId: state && state.context.containerId,
-            requestCount: state && state.context.requestCount,
-          }));
+          .json(response.format);
       });
   }
 
   static logout(req, res) {
     requestCount += 1;
 
-    res.cookie(constants.CREDENTIAL.JWT.COOKIE_NAME, '', {
-      httpOnly: constants.CREDENTIAL.JWT.COOKIE_HTTP_ONLY,
-      secure: constants.CREDENTIAL.JWT.COOKIE_SECURE,
-      path: constants.CREDENTIAL.JWT.COOKIE_PATH,
-      signed: constants.CREDENTIAL.JWT.COOKIE_SIGNED,
-    });
+    res.clearCookie(constants.CREDENTIAL.JWT.COOKIE_NAME)//, '', {
+    //  httpOnly: constants.CREDENTIAL.JWT.COOKIE_HTTP_ONLY,
+    //  secure: constants.CREDENTIAL.JWT.COOKIE_SECURE,
+    //  path: constants.CREDENTIAL.JWT.COOKIE_PATH,
+    //  signed: constants.CREDENTIAL.JWT.COOKIE_SIGNED,
+    //});
 
     const response = new StandardResponseWrapper([{ success: true }],
       constants.SYSTEM.RESPONSE_NAMES.LOGOUT);
@@ -415,7 +425,9 @@ class AuthController {
           email: email.trim() && email.toLowerCase(),
         };
         const context = { containerId, requestCount };
-        const state = ProcessSate.create(options, context);
+
+        state = ProcessSate.create(options, context);
+
         const forgotPasswordStrategy = {
           storeType: constants.STORE.TYPES.MONGO_DB,
           operation: {
@@ -427,7 +439,7 @@ class AuthController {
           tableName: constants.STORE.TABLE_NAMES.USER,
         };
 
-        return AuthController._handleRequest(state, res, DatabaseService, forgotPasswordStrategy)
+        return AuthController._handleRequest(state, res, DatabaseService, forgotPasswordStrategy);
       })
       .then((result) => {
         if (!Array.isArray(result) || (result.length !== 1)) {
@@ -507,22 +519,6 @@ class AuthController {
         const resStatusCode = err.getNthError(0).code < 1000 ?
           err.getNthError(0).code : constants.SYSTEM.HTTP_STATUS_CODES.INTERNAL_SERVER_ERROR;
 
-        if (err.getNthError(0).name === constants.AUTH.ERROR_NAMES.USER_EMAIL_NOT_FOUND) {
-          const response = new StandardResponseWrapper([
-            {
-              success: false,
-              status: err.getNthError(0).name,
-              detail: err.format({
-                containerId: state && state.context.containerId,
-                requestCount: state && state.context.requestCount,
-              }),
-            },
-          ], constants.SYSTEM.RESPONSE_NAMES.FORGOT_PASSWORD);
-
-          return res.status(resStatusCode)
-            .json(response.format);
-        }
-
         err.append({
           code: constants.SYSTEM.ERROR_CODES.INTERNAL_SERVER_ERROR,
           name: constants.SYSTEM.ERROR_NAMES.CAUGHT_ERROR_IN_AUTH_CONTROLLER,
@@ -530,11 +526,19 @@ class AuthController {
           message: constants.SYSTEM.ERROR_MSG.CAUGHT_ERROR_IN_AUTH_CONTROLLER,
         });
 
+        const response = new StandardResponseWrapper([
+          {
+            success: false,
+            status: err.getNthError(0).name,
+            detail: err.format({
+              containerId: state && state.context.containerId,
+              requestCount: state && state.context.requestCount,
+            }),
+          },
+        ], constants.SYSTEM.RESPONSE_NAMES.FORGOT_PASSWORD);
+
         return res.status(resStatusCode)
-          .json(err.format({
-            containerId: state && state.context.containerId,
-            requestCount: state && state.context.requestCount,
-          }));
+          .json(response.format);
       });
   }
 
@@ -543,9 +547,10 @@ class AuthController {
 
     // [TODO] HTTP request's query string should not be case sensitive for both key and value.
     try {
-      const jwtPayload = Object.assign({}, req.query, {
-        sub: `${req.query.type}:${req.query.email}:${req.query._id}`,
-      });
+      const jwtPayload = {
+        ...req.query,
+        sub: `${req.query.email}:${req.query._id}`,
+      };
       const jwtToken = jwt.sign(jwtPayload, jwtSecret, {
         issuer: jwtIssuer,
         audience: jwtAudience,
@@ -558,7 +563,10 @@ class AuthController {
         secure: constants.CREDENTIAL.JWT.COOKIE_SECURE,
         path: constants.CREDENTIAL.JWT.COOKIE_PATH,
         signed: constants.CREDENTIAL.JWT.COOKIE_SIGNED,
+        maxAge: 3600000, // TODO
       });
+
+      return res.sendStatus(200);
 
       return res.redirect(constants.SYSTEM.HTTP_STATUS_CODES.PERMANENT_REDIRECT,
         `${req.query.callback_url}`);
@@ -573,8 +581,16 @@ class AuthController {
         },
       ]);
 
+      const response = new StandardResponseWrapper([
+        {
+          success: false,
+          status: err.getNthError(0).name,
+          detail: err.format(),
+        },
+      ], constants.SYSTEM.RESPONSE_NAMES.GET_TOKEN);
+
       return res.status(constants.SYSTEM.HTTP_STATUS_CODES.INTERNAL_SERVER_ERROR)
-        .json(err.format({ containerId, requestCount }));
+        .json(response.format);
     }
   }
 
@@ -606,10 +622,10 @@ class AuthController {
       .then((result) => {
         const user = Array.isArray(result) ? { ...result[0] } : {};
         const jwtToken = jwt.sign(user, jwtSecret, {
-          expiresIn: jwtExpiresIn,
-          notBefore: jwtNotBefore,
           issuer: jwtIssuer,
           audience: jwtAudience,
+          expiresIn: jwtExpiresIn,
+          notBefore: jwtNotBefore,
         });
 
         res.cookie(constants.CREDENTIAL.JWT.COOKIE_NAME, jwtToken, {
@@ -639,11 +655,19 @@ class AuthController {
           message: constants.SYSTEM.ERROR_MSG.CAUGHT_ERROR_IN_AUTH_CONTROLLER,
         });
 
+        const response = new StandardResponseWrapper([
+          {
+            success: false,
+            status: err.getNthError(0).name,
+            detail: err.format({
+              containerId: state && state.context.containerId,
+              requestCount: state && state.context.requestCount,
+            }),
+          },
+        ], constants.SYSTEM.RESPONSE_NAMES.AUTH_CHECK);
+
         return res.status(resStatusCode)
-          .json(err.format({
-            containerId: state && state.context.containerId,
-            requestCount: state && state.context.requestCount,
-          }));
+          .json(response.format);
       });
   }
 

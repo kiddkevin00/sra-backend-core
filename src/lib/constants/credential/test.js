@@ -1,7 +1,7 @@
 exports.JWT = {
   SECRET: 'test-jwt-secret',
-  ISSUER: 'sra-backend-core.herokuapp.com',
-  AUDIENCE: 'society-risk-analysis.herokuapp.com',
+  ISSUER: '0.0.0.0:8087 ',
+  AUDIENCE: '0.0.0.0:8088',
   EXPIRES_IN: '365 days',
   NOT_BEFORE: 0,
 

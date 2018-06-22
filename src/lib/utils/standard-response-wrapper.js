@@ -1,5 +1,5 @@
 /*
- * Standard response format (for 2XX status code only for now):
+ * Standard response format:
  *
  * ```
  * {
@@ -29,7 +29,6 @@
 
 const StandardErrorWrapper = require('./standard-error-wrapper');
 const constants = require('../constants/');
-
 
 const responseContext = Symbol('response-context');
 
