@@ -617,6 +617,12 @@ class AuthController {
       })
       .then((result) => {
         const user = Array.isArray(result) ? { ...result[0] } : {};
+
+        delete user.passwordHash;
+        delete user.isSuspended;
+        delete user.version;
+        delete user.systemData;
+
         const jwtToken = jwt.sign(user, jwtSecret, {
           issuer: jwtIssuer,
           audience: jwtAudience,
