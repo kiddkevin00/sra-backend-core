@@ -9,5 +9,6 @@ exports.JWT = {
   COOKIE_HTTP_ONLY: true,
   COOKIE_SECURE: false,
   COOKIE_PATH: '/api',
+  COOKIE_MAX_AGE: 365 * 24 * 60 * 60 * 1000,
   COOKIE_SIGNED: false,
 };

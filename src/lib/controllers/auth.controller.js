@@ -236,8 +236,8 @@ class AuthController {
           httpOnly: constants.CREDENTIAL.JWT.COOKIE_HTTP_ONLY,
           secure: constants.CREDENTIAL.JWT.COOKIE_SECURE,
           path: constants.CREDENTIAL.JWT.COOKIE_PATH,
+          maxAge: constants.CREDENTIAL.JWT.COOKIE_MAX_AGE,
           signed: constants.CREDENTIAL.JWT.COOKIE_SIGNED,
-          maxAge: 3600000, // TODO
         });
 
         const response = {
@@ -348,6 +348,7 @@ class AuthController {
             httpOnly: constants.CREDENTIAL.JWT.COOKIE_HTTP_ONLY,
             secure: constants.CREDENTIAL.JWT.COOKIE_SECURE,
             path: constants.CREDENTIAL.JWT.COOKIE_PATH,
+            maxAge: constants.CREDENTIAL.JWT.COOKIE_MAX_AGE,
             signed: constants.CREDENTIAL.JWT.COOKIE_SIGNED,
           });
         } else {
@@ -395,12 +396,9 @@ class AuthController {
   static logout(req, res) {
     requestCount += 1;
 
-    res.clearCookie(constants.CREDENTIAL.JWT.COOKIE_NAME, {path:'/api'})//, '', {
-    //  httpOnly: constants.CREDENTIAL.JWT.COOKIE_HTTP_ONLY,
-    //  secure: constants.CREDENTIAL.JWT.COOKIE_SECURE,
-    //  path: constants.CREDENTIAL.JWT.COOKIE_PATH,
-    //  signed: constants.CREDENTIAL.JWT.COOKIE_SIGNED,
-    //});
+    res.clearCookie(constants.CREDENTIAL.JWT.COOKIE_NAME, {
+      path: constants.CREDENTIAL.JWT.COOKIE_PATH,
+    });
 
     const response = new StandardResponseWrapper([{ success: true }],
       constants.SYSTEM.RESPONSE_NAMES.LOGOUT);
@@ -562,11 +560,9 @@ class AuthController {
         httpOnly: constants.CREDENTIAL.JWT.COOKIE_HTTP_ONLY,
         secure: constants.CREDENTIAL.JWT.COOKIE_SECURE,
         path: constants.CREDENTIAL.JWT.COOKIE_PATH,
+        maxAge: constants.CREDENTIAL.JWT.COOKIE_MAX_AGE,
         signed: constants.CREDENTIAL.JWT.COOKIE_SIGNED,
-        maxAge: 3600000, // TODO
       });
-
-      return res.sendStatus(200);
 
       return res.redirect(constants.SYSTEM.HTTP_STATUS_CODES.PERMANENT_REDIRECT,
         `${req.query.callback_url}`);
@@ -632,6 +628,7 @@ class AuthController {
           httpOnly: constants.CREDENTIAL.JWT.COOKIE_HTTP_ONLY,
           secure: constants.CREDENTIAL.JWT.COOKIE_SECURE,
           path: constants.CREDENTIAL.JWT.COOKIE_PATH,
+          maxAge: constants.CREDENTIAL.JWT.COOKIE_MAX_AGE,
           signed: constants.CREDENTIAL.JWT.COOKIE_SIGNED,
         });
 
