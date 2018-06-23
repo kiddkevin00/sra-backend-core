@@ -50,6 +50,7 @@ class AuthController {
             data: [
               { email: state.email },
               {
+                type: 'unpaid',
                 email: state.email,
                 isUnsubscribed: false,
                 version: majorVersion,
@@ -79,7 +80,6 @@ class AuthController {
           .json(standardResponse.format);
       })
       .catch((_err) => {
-      //console.log(_err)
         const err = new StandardErrorWrapper(_err);
         const resStatusCode = err.getNthError(0).code < 1000 ?
           err.getNthError(0).code : constants.SYSTEM.HTTP_STATUS_CODES.INTERNAL_SERVER_ERROR;
@@ -186,33 +186,24 @@ class AuthController {
       })
       .then((result) => {
         const user = { ...result };
-        //const emailSender = new EmailSender('Gmail', '2012tsra@gmail.com');
-        //const from = '"Society Risk Analysis Team" <2012tsra@gmail.com>';
-        //const to = state.email;
-        //const subject = 'Welcome to Society Risk Analysis';
-        //
-        //// [TODO] Update content.
-        //const html = fs.readFileSync(path.resolve(__dirname, '../views/welcome-email.html'),
-        //  'utf8');
-        //
-        //emailSender.sendMail(from, to, subject, html)
-        //  .then((info) => {
-        //    // [TODO] Replace with logger module.
-        //    console.log('Welcome email message ID - %s sent: %s', info.messageId, info.response);
-        //  })
-        //  .catch((_err) => {
-        //    const err = new StandardErrorWrapper(_err);
-        //
-        //    err.append({
-        //      code: constants.SYSTEM.ERROR_CODES.INTERNAL_SERVER_ERROR,
-        //      name: constants.SYSTEM.ERROR_NAMES.CAUGHT_ERROR_IN_AUTH_CONTROLLER,
-        //      source: constants.SYSTEM.COMMON.CURRENT_SOURCE,
-        //      message: constants.SYSTEM.ERROR_MSG.CAUGHT_ERROR_IN_AUTH_CONTROLLER,
-        //    });
-        //
-        //    // [TODO] Replace with logger module.
-        //    console.log('Something went wrong while sending welcome email...', err);
-        //  });
+        const emailSender = new EmailSender('Gmail', 'srataiwan@gmail.com');
+        const from = '"Society Risk Analysis Team" <srataiwan@gmail.com>';
+        const to = state.email;
+        const subject = 'Welcome to Society Risk Analysis';
+
+        // [TODO] Update content.
+        const html = fs.readFileSync(path.resolve(__dirname, '../views/welcome-email.html'),
+          'utf8');
+
+        emailSender.sendMail(from, to, subject, html)
+          .then((info) => {
+            // [TODO] Replace with logger module.
+            console.log('Welcome email message ID - %s sent: %s', info.messageId, info.response || 'N/A');
+          })
+          .catch((err) => {
+            // [TODO] Replace with logger module.
+            console.log('Something went wrong while sending welcome email...', err);
+          });
 
         delete user.passwordHash;
         delete user.isSuspended;

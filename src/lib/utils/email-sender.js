@@ -5,15 +5,15 @@ class EmailSender {
 
   constructor(senderService, senderEmail) {
     // eslint-disable-next-line max-len
-    // Google API Setup URL: https://developers.google.com/oauthplayground/?code=4/H5QyIJiiYzgLO2HKMMN54dMtDG8WW-zrWigW87uWKtI#
+    // Google API Setup URL: https://developers.google.com/oauthplayground/?code=4/AADEq_FelDR_T5qhDG_3-J0oO1fYh7J70YMSQSHU_WIlO5TFDUBqgFAIdH6UvlPxymi2CuQtdi7Br9rOD81zpbg#
     this.transporter = nodemailer.createTransport('SMTP', ({
       service: senderService,
       auth: {
         XOAuth2: {
           user: senderEmail,
-          clientId: '572537695908-o1iucehpbk5kn5cqndtlocrq24amti1u.apps.googleusercontent.com',
-          clientSecret: 'KOYpGrs16BnuFgyJCvsv7iDz',
-          refreshToken: '1/YK7qAoZBi2mB63E-HjvxNV8qxEqc1ZGJwOCg2GqbcZQ',
+          clientId: '264731733927-q3g1b1dj1rgqe7q4po5k85f8i6cs862t.apps.googleusercontent.com',
+          clientSecret: 'eI7kzE5GTX-LkWKDyCIep_8K',
+          refreshToken: '1/ZrMXbbhUv5Z7lrJPLwEng8uzcKufaLLJiVFXk9f22Jg',
         },
       },
     }));
