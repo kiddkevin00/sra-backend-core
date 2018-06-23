@@ -187,9 +187,10 @@ class AuthController {
       .then((result) => {
         const user = { ...result };
         const emailSender = new EmailSender('Gmail', 'srataiwan@gmail.com');
-        const from = '"Society Risk Analysis Team" <srataiwan@gmail.com>';
+
+        const from = '"台灣風險分析學會" <srataiwan@gmail.com>';
         const to = state.email;
-        const subject = 'Welcome to Society Risk Analysis';
+        const subject = '台灣風險分析學會 - 帳號啟動認證信';
 
         // [TODO] Update content.
         const html = fs.readFileSync(path.resolve(__dirname, '../views/welcome-email.html'),
