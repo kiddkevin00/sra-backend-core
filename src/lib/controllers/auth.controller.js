@@ -50,7 +50,6 @@ class AuthController {
             data: [
               { email: state.email },
               {
-                type: 'unpaid',
                 email: state.email,
                 isUnsubscribed: false,
                 version: majorVersion,
@@ -165,6 +164,7 @@ class AuthController {
             type: constants.STORE.OPERATIONS.INSERT,
             data: [
               {
+                type: 'unpaid',
                 email: state.email,
                 passwordHash: state.password, // [TODO] Should store hashed password instead.
                 fullName: state.fullName,
